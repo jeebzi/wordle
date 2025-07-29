@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Wordle Helper</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2em auto; }
+    label, input, button { display: block; margin: 0.5em 0; }
+    #result { margin-top: 1.5em; padding: 1em; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+
+  <h1>Wordle Helper</h1>
+
+  <form id="playForm">
+    <label for="choix">Mot (5 lettres) :</label>
+    <input type="text" id="choix" name="choix" maxlength="5" required>
+
+    <label for="couleurs">
+      Couleurs (0=gris,1=jaune,2=vert, ex. 01210) :
+    </label>
+    <input type="text" id="couleurs" name="couleurs" pattern="[0-2]{5}" required>
+
+    <button type="submit">Envoyer</button>
+  </form>
+
+  <div id="result">
+    <p><strong>Recommendation :</strong> <span id="reco">–</span></p>
+    <p><strong>Mots restants :</strong> <span id="count">–</span></p>
+    <ul id="words" style="max-height:200px; overflow:auto; padding-left:1.2em;"></ul>
+  </div>
+
+  <script>
+    // stockage de l'historique côté client
+    let historique = [];
+
+    document.getElementById('playForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const choix = document.getElementById('choix').value;
+      const couleurs = document.getElementById('couleurs').value;
+
+      // on ajoute le tour à l'historique
+      historique.push({ choix, couleurs });
+
+      // requête à l'API
+      const resp = await fetch('/round', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ historique })
+      });
+      const data = await resp.json();
+      if (data.status === 'ok') {
+        document.getElementById('reco').textContent = data.reco;
+        document.getElementById('count').textContent = data.mots_restants.length;
+        // afficher la liste (limité aux 50 premiers pour ne pas saturer)
+        const ul = document.getElementById('words');
+        ul.innerHTML = '';
+        data.mots_restants.slice(0, 50).forEach(m => {
+          const li = document.createElement('li');
+          li.textContent = m;
+          ul.appendChild(li);
+        });
+      } else {
+        alert('Erreur : ' + data.message);
+      }
+      // réinitialiser le formulaire pour le tour suivant
+      document.getElementById('choix').value = '';
+      document.getElementById('couleurs').value = '';
+      document.getElementById('choix').focus();
+    });
+  </script>
+
+</body>
+</html>
+
