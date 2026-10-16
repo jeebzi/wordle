@@ -12,12 +12,15 @@ def load_name(path):
     f.close()
     return tab
 
-def faire_choix():
+def faire_choix(reco):
     """
     prompte l'utilisateur à choisir un mot de 5 lettres
+    si la chaine est vide le choix est la reco par default
     """
     choix = input("choisissez un mot de 5 lettres: ")
-    while len(choix) != 5:
+    if len(choix) == 0:
+        return reco
+    while len(choix):
         choix = input("arrête de faire le retard: ")
     return choix
 
@@ -162,7 +165,7 @@ def main():
             reco = "arose"
         affiche_combo(mots)
         print("reco:", reco)
-        choix = faire_choix()
+        choix = faire_choix(reco)
         guess = init_guess(choix)
         filtre(mots, guess)
         cpt += 1
