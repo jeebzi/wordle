@@ -20,7 +20,7 @@ def faire_choix(reco):
     choix = input("choisissez un mot de 5 lettres: ")
     if len(choix) == 0:
         return reco
-    while len(choix):
+    while len(choix) != 5:
         choix = input("arrête de faire le retard: ")
     return choix
 
